@@ -1,0 +1,11 @@
+.Header {
+  text-align: center;
+}
+
+/* .transaction-form {
+  display:inline-block
+} */
+
+.transaction-list {
+  display:grid;
+}
