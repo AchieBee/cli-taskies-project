@@ -25,3 +25,13 @@ def remove_task(file_path, task_index):
         return removed_task
     else:
         return None
+
+# Function to remove a user from the database
+def remove_user(session, user_id):
+    user = session.query(User).filter_by(id=user_id).first()
+    if user:
+        removed_username = user.username
+        session.delete(user)
+        session.commit()
+        return removed_username
+    return None
