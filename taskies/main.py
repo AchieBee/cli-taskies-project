@@ -119,6 +119,16 @@ def remove_task(session, task_id):
         return removed_task_description
     return None
 
+# Function to remove a sale from the database
+def remove_sale(session, sale_id):
+    sale = session.query(Sale).filter_by(id=sale_id).first()
+    if sale:
+        removed_sale_business_name = sale.business_name
+        session.delete(sale)
+        session.commit()
+        return removed_sale_business_name
+    return None
+
 # Function to update a task in the database
 def update_task(session, task_id, updated_description, updated_start_time, updated_end_time):
     task = session.query(Task).filter_by(id=task_id).first()
@@ -141,6 +151,20 @@ def update_sale(session, sale_id, updated_business_name, updated_amount):
             sale.business_name = updated_business_name
         if updated_amount is not None:
             sale.amount = updated_amount
+        session.commit()
+        return True
+    return False
+
+# Function to update user information in the database
+def update_user(session, user_id, updated_username, updated_phone_number, updated_location):
+    user = session.query(User).filter_by(id=user_id).first()
+    if user:
+        if updated_username:
+            user.username = updated_username
+        if updated_phone_number:
+            user.phone_number = updated_phone_number
+        if updated_location:
+            user.location = updated_location  # Update the user's location
         session.commit()
         return True
     return False
@@ -172,11 +196,11 @@ def main():
     session = Session()
 
     # Welcome message
-    print(Fore.CYAN + Style.BRIGHT + "Welcome to Taskies - Your Personal Task Manager\n")
+    print(Fore.CYAN + Style.BRIGHT + "Welcome to Taskies, Time is Money!\n")
 
     while True:
         print(Fore.RESET + Style.RESET_ALL)
-        print("Options:")
+        print("MENU:")
         print("1. Show tasks")
         print("2. Add a task")
         print("3. Remove a task")
@@ -186,9 +210,10 @@ def main():
         print("7. Update user information")
         print("8. Show users")
         print("9. Add a sale")
-        print("10. Update a sale")
-        print("11. Show sales")
-        print("12. Quit")
+        print("10. Remove a sale")
+        print("11. Update a sale")
+        print("12. Show sales")
+        print("13. Quit")
 
         choice = input(Fore.CYAN + "Enter your choice: ")
 
@@ -278,20 +303,8 @@ def main():
             updated_username = input("Enter the updated username (or leave blank to skip): ")
             updated_phone_number = input("Enter the updated phone number (or leave blank to skip): ")
             updated_location = input("Enter the updated location (or leave blank to skip): ")
-            
-            # Update user info
-            user = session.query(User).filter_by(id=user_id).first()
-            if user:
-                if updated_username:
-                    user.username = updated_username
-                if updated_phone_number:
-                    user.phone_number = updated_phone_number
-                if updated_location:
-                    user.location = updated_location
-                session.commit()
-                print(Fore.GREEN + "User information updated successfully.")
-            else:
-                print(Fore.YELLOW + "User not found.")
+            update_user(session, user_id, updated_username, updated_phone_number, updated_location)
+            print(Fore.GREEN + f"User information updated successfully.")
         elif choice == '8':
             show_users(session)
         elif choice == '9':
@@ -307,6 +320,20 @@ def main():
 
             add_sale_to_db(session, business_name, user_id, amount)
         elif choice == '10':
+            show_sales(session)
+            sale_id = input("Enter the sale ID to remove: ")
+            try:
+                sale_id = int(sale_id)
+            except ValueError:
+                print(Fore.RED + "Invalid input. Sale ID must be an integer.")
+                continue
+
+            removed_sale_business_name = remove_sale(session, sale_id)
+            if removed_sale_business_name:
+                print(Fore.GREEN + f"Sale '{removed_sale_business_name}' removed successfully.")
+            else:
+                print(Fore.YELLOW + "Invalid sale ID.")
+        elif choice == '11':
             show_sales(session)
             sale_id = input("Enter the sale ID to update: ")
             try:
@@ -324,11 +351,11 @@ def main():
                 continue
 
             update_sale(session, sale_id, updated_business_name, updated_amount)
-        elif choice == '11':
-            show_sales(session)
         elif choice == '12':
+            show_sales(session)
+        elif choice == '13':
             print(Fore.RESET + Style.RESET_ALL)
-            print("Goodbye!")
+            print(Fore.CYAN + Style.BRIGHT + "Thank You!!")
             break
         else:
             print(Fore.YELLOW + "Invalid choice. Please try again.")
